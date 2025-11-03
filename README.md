@@ -131,6 +131,7 @@ tensorboard --logdir results/
 ## Documentation
 
 - **README.md** (this file) - Project overview and setup
+- **DATA-PREP.md** - How to prepare a new dataset
 - **TODO.md** - Remaining work and detailed roadmap
 - **experiments/README.md** - Experiment-specific details
 
