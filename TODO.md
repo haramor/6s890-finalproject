@@ -13,7 +13,7 @@
 ## 📋 For Progress Report (This Week)
 
 - [ ] Run demo and document that infrastructure works
-- [ ] Create slides showing:
+- [ ] Write up about:
   - Three experimental conditions
   - Game-theoretic loss formula
   - Training demo results (loss decreasing)
@@ -23,7 +23,7 @@
 
 ## 🎯 For Final Project
 
-### 1. Data Acquisition (Datasets Team)
+### 1. Data Acquisition 
 
 **Download Lichess Database**
 - Source: https://database.lichess.org/
@@ -40,7 +40,7 @@
 - Format: Same as `prepare_sample_data.py` output
 - Place in: `experiments/data/mixed_skill/` and `experiments/data/expert_2500/`
 
-### 2. Full-Scale Training (Model Team)
+### 2. Full-Scale Training 
 
 **Update Configs for Real Data**
 ```python
@@ -67,7 +67,7 @@ python scripts/train.py --config configs/game_theoretic_config.py
 - Run each condition 3-5 times with different random seeds
 - Compute mean and confidence intervals
 
-### 3. Evaluation & Analysis (Evaluation Team)
+### 3. Evaluation & Analysis 
 
 **Sample Complexity Curves**
 - Train on: 10K, 50K, 100K, 500K, 1M games
@@ -115,7 +115,7 @@ python scripts/train.py --config configs/game_theoretic_config.py
 
 ---
 
-## 🔧 Optional Improvements
+## 🔧 Thoughts on optional Improvements
 
 - [ ] Precompute Stockfish evaluations offline (faster training)
 - [ ] Adaptive GT weight (anneal during training)
@@ -133,21 +133,4 @@ python scripts/train.py --config configs/game_theoretic_config.py
 4. **Centipawn Loss**: Average per move
 5. **Statistical Significance**: p-values, confidence intervals
 
----
 
-## ⏱️ Estimated Timeline
-
-- **Week 1** (now): Progress report
-- **Week 2-3**: Download & prepare real data
-- **Week 4-5**: Full-scale training experiments
-- **Week 6**: Evaluation & analysis
-- **Week 7**: Writing & figures
-- **Week 8**: Final polish & submission
-
----
-
-## 📞 Team Coordination
-
-**Datasets → Model**: HDF5 files in correct format
-**Model → Evaluation**: Checkpoints and TensorBoard logs
-**All**: Regular syncs on progress and blockers
