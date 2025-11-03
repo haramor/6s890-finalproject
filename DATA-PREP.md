@@ -66,6 +66,8 @@ run chmod +x build_dataset.sh in your subfolder
 
 Then run ./build_dataset.sh
 
+Find more tag information [here](https://www.cs.kent.ac.uk/people/staff/djb/pgn-extract/help.html)
+
 ## 5. Create the .h5 file
 
 Then in .venv2/lib/python3.11/site-packages/chess_transformers/configs/data/custom_config.py edit the data_folder to point to your folder, the name of the output file, and optionally other parameters
