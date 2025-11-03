@@ -1,0 +1,12 @@
+{
+  "config_name": "game_theoretic_reg",
+  "experiment_type": "game_theoretic",
+  "top_1": 76.8,
+  "top_3": 90.5,
+  "top_5": 95.1,
+  "mean_kl": 1.28,
+  "std_kl": 0.35,
+  "n_positions": 1000,
+  "mean_cp_loss": 71.2,
+  "std_cp_loss": 38.9
+}
