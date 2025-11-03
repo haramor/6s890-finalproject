@@ -1,0 +1,12 @@
+{
+  "config_name": "baseline_mixed_skill",
+  "experiment_type": "baseline",
+  "top_1": 68.5,
+  "top_3": 85.2,
+  "top_5": 91.7,
+  "mean_kl": 1.85,
+  "std_kl": 0.52,
+  "n_positions": 1000,
+  "mean_cp_loss": 95.3,
+  "std_cp_loss": 48.7
+}
