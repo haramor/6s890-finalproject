@@ -1,0 +1,43 @@
+# Virtual Environment
+venv/
+env/
+*.pyc
+__pycache__/
+
+# Data files (too large for git)
+experiments/data/*/*.h5
+*.h5
+
+# Training outputs
+experiments/results/
+experiments/checkpoints/
+*.pt
+*.pth
+
+# TensorBoard logs
+experiments/logs/
+*.tfevents.*
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.log
+*.tmp
+
+# Claude Code internal files
+.claude/
+.claude_cache/
+.claude_history/
