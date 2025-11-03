@@ -128,28 +128,6 @@ tensorboard --logdir results/
 # Open http://localhost:6006
 ```
 
-## Team Coordination
-
-### For Datasets Team
-When you have real Lichess data:
-1. Convert to HDF5 format (see chess-transformers data prep)
-2. Place in `experiments/data/mixed_skill/` and `experiments/data/expert_2500/`
-3. Update config files to point to real data
-
-### For Evaluation Team
-Training pipeline logs:
-- Top-1, top-3, top-5 accuracy
-- Training loss (CE + KL components)
-- TensorBoard metrics
-
-You'll need to add:
-- Sample complexity curves
-- Stockfish alignment metrics
-- Centipawn loss
-- Statistical tests
-
-See `TODO.md` for detailed roadmap.
-
 ## Documentation
 
 - **README.md** (this file) - Project overview and setup
