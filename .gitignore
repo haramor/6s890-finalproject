@@ -41,3 +41,6 @@ Thumbs.db
 .claude/
 .claude_cache/
 .claude_history/
+
+# Cloned repositories (users should clone separately)
+chess-transformers/
