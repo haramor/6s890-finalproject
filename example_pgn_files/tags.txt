@@ -1,6 +1,6 @@
-WhiteElo >= "1600"
-BlackElo >= "1500"
-#Elo >= "2400" # This means that at least one player hits this threshold
+#WhiteElo >= "1600"
+#BlackElo >= "1500"
+Elo >= "2400" # This means that at least one player hits this threshold
 #EloDiff <= "200"
 
 TimeControl >= "300"
