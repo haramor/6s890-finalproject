@@ -1,0 +1,2 @@
+TimeControl >= "300"
+Elo >= "2000"
