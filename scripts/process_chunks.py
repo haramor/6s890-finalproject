@@ -148,12 +148,11 @@ def run_analyze(chunk_dir: Path) -> None:
         print(f"[analyze] No filtered_games.pgn in {chunk_dir}, skipping analysis.")
         return
 
-    analyze_script = ROOT / "scripts" / "analyze_games4.py"
+    analyze_script = ROOT / "scripts" / "analyze_games.py"
     if not analyze_script.exists():
         print("[analyze] analyze_games.py not found, skipping analysis.")
         return
     out_json = chunk_dir / "stats.json"
-
     print(f"[analyze] Running analysis -> {out_json}")
     subprocess.run(
         [
@@ -165,6 +164,7 @@ def run_analyze(chunk_dir: Path) -> None:
         ],
         check=True,
     )
+
     #print(f"[analyze] Analyzing {filtered}")
     #subprocess.run(
     #    [sys.executable, str(analyze_script), str(filtered)],
