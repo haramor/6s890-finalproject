@@ -27,46 +27,63 @@ def load_progress(progress_path: Path) -> dict:
     return {
         "games_processed": 0,
         "next_chunk_index": 1,
+        "byte_offset": 0,  # new: track file byte offset
     }
-
 
 def save_progress(progress_path: Path, progress: dict) -> None:
     progress_path.write_text(json.dumps(progress, indent=2))
 
 
-def stream_games(pgn_path: Path, skip_n: int):
+def stream_games(pgn_path: Path, start_offset: int = 0, skip_n: int = 0):
     """
-    Generator over games in a PGN file, skipping the first skip_n games.
+    Generator over games in a PGN file.
+
+    If start_offset > 0, seek to that byte position in the file and start
+    reading games from there.
+
+    Otherwise, skip the first skip_n games by parsing them.
+    Yields (game, offset_after_game) tuples, where offset_after_game is the
+    file position immediately after reading that game.
     """
     with pgn_path.open("r", encoding="utf-8", errors="ignore") as f:
-        # skip already-processed games
-        for _ in range(skip_n):
-            g = chess.pgn.read_game(f)
-            if g is None:
-                return  # EOF reached early
+        if start_offset and start_offset > 0:
+            # Fast resume: jump straight to the stored byte offset
+            f.seek(start_offset)
+        else:
+            # Slow path: skip already-processed games by parsing them
+            for _ in range(skip_n):
+                g = chess.pgn.read_game(f)
+                if g is None:
+                    return  # EOF reached early
 
         while True:
             game = chess.pgn.read_game(f)
             if game is None:
                 break
-            yield game
+            # We record the file position *after* reading this game
+            yield game, f.tell()
 
 
-def write_chunk_pgn(games, out_path: Path, max_games: int) -> int:
+def write_chunk_pgn(games, out_path: Path, max_games: int) -> tuple[int, int]:
     """
     Write up to max_games from iterator `games` into out_path.
-    Returns number of games written.
+    `games` should yield (game, offset_after_game) tuples.
+
+    Returns:
+        (num_games_written, last_offset_after_game)
     """
     count = 0
+    last_offset = 0
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with out_path.open("w", encoding="utf-8") as f_out:
-        for game in games:
+        for game, offset in games:
             if count >= max_games:
                 break
             f_out.write(str(game))
             f_out.write("\n\n")
             count += 1
-    return count
+            last_offset = offset
+    return count, last_offset
 
 
 def run_build_dataset(chunk_dir: Path) -> None:
@@ -169,12 +186,19 @@ def process_chunks(
 
     games_processed = int(progress.get("games_processed", 0))
     next_chunk_index = int(progress.get("next_chunk_index", 1))
+    byte_offset = int(progress.get("byte_offset", 0))
 
-    print(f"[info] Starting from games_processed={games_processed}, "
-          f"next_chunk_index={next_chunk_index}")
+    print(
+        f"[info] Starting from games_processed={games_processed}, "
+        f"next_chunk_index={next_chunk_index}, byte_offset={byte_offset}"
+    )
 
-    # stream games, skipping already-processed ones
-    game_iter = stream_games(huge_pgn, skip_n=games_processed)
+    # If we have a byte_offset, use it (fast resume).
+    # Otherwise, fall back to skipping games by parsing them once.
+    if byte_offset > 0:
+        game_iter = stream_games(huge_pgn, start_offset=byte_offset, skip_n=0)
+    else:
+        game_iter = stream_games(huge_pgn, start_offset=0, skip_n=games_processed)
 
     chunks_done = 0
 
@@ -198,14 +222,18 @@ def process_chunks(
             continue
 
         print(f"[chunk {chunk_id}] Writing up to {chunk_size} games to {raw_pgn}...")
-        n_games_chunk = write_chunk_pgn(game_iter, raw_pgn, max_games=chunk_size)
+        n_games_chunk, last_offset = write_chunk_pgn(
+            game_iter, raw_pgn, max_games=chunk_size
+        )
 
         if n_games_chunk == 0:
             print("[info] No more games to process. Done.")
             break
 
-        print(f"[chunk {chunk_id}] Wrote {n_games_chunk} games.")
-
+        print(
+            f"[chunk {chunk_id}] Wrote {n_games_chunk} games. "
+            f"Last file offset={last_offset}"
+        )
         # Run build_dataset.sh inside this chunk directory
         print(f"[chunk {chunk_id}] Running build_dataset.sh...")
         run_build_dataset(chunk_dir)
@@ -217,7 +245,7 @@ def process_chunks(
         # Optional: run analysis on this chunk
         print(f"[chunk {chunk_id}] Running analyze_games.py...")
         run_analyze(chunk_dir)
-
+       
         # Only now update progress (so a crash mid-chunk doesn’t “skip” games)
         games_processed += n_games_chunk
         next_chunk_index += 1
@@ -225,6 +253,7 @@ def process_chunks(
 
         progress["games_processed"] = games_processed
         progress["next_chunk_index"] = next_chunk_index
+        progress["byte_offset"] = last_offset
         save_progress(progress_path, progress)
 
         print(
