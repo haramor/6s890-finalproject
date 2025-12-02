@@ -1,2 +1,3 @@
 TimeControl >= "300"
-Elo >= "2000"
+WhiteElo >= "1000"
+BlackElo >= "1000"
