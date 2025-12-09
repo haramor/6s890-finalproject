@@ -8,6 +8,7 @@ compiling pgn-extract, and preparing everything for the chunked PGN pipeline.
 0. Repository Layout (expected)
 --------------------------------------------------------------------------------
 
+```text
 /workspace/6s890-finalproject
   chess-transformers/
     Makefile
@@ -27,12 +28,12 @@ compiling pgn-extract, and preparing everything for the chunked PGN pipeline.
     data_files/
       <YOUR_HUGE_PGN>.pgn
     chunks/
-
+```
 
 --------------------------------------------------------------------------------
 1. System Dependencies (Ubuntu) -- This can be skipped
 --------------------------------------------------------------------------------
-
+```
 apt-get update
 apt-get install -y \
     python3-venv python3-dev \
@@ -41,7 +42,7 @@ apt-get install -y \
     zlib1g-dev \
     git \
     curl
-
+```
 --------------------------------------------------------------------------------
 2. Create Virtual Environment
 --------------------------------------------------------------------------------
@@ -63,20 +64,20 @@ Both should be
 /workspace/6s890-finalproject/.venv/bin/pip
 otherwise do python -m pip install ...
 
-# ---- GPU-enabled Linux (A100/T4/V100) ----
+## ---- GPU-enabled Linux (A100/T4/V100) ----
 pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 
-# ---- CPU-only Linux or Mac ----
-# pip install torch==2.2.2
+## ---- CPU-only Linux or Mac ----
+## pip install torch==2.2.2
 
 --------------------------------------------------------------------------------
 4. Install Required Python Packages
 --------------------------------------------------------------------------------
 
-# IMPORTANT: numpy and tables must be pinned
+## IMPORTANT: numpy and tables must be pinned
 pip install "numpy==1.26.4" "tables==3.10.2"
 
-# Additional libraries used by the pipeline
+## Additional libraries used by the pipeline
 pip install \
     pandas \
     python-chess \
@@ -94,12 +95,12 @@ cd /workspace/6s890-finalproject
 
 git clone https://github.com/sgrvinod/chess-transformers.git
 
-# Editable install so that code updates automatically apply
-# NO-DEPS prevents pip from overriding numpy/tables/etc.
+## Editable install so that code updates automatically apply
+## NO-DEPS prevents pip from overriding numpy/tables/etc.
 <!-- pip install -e ./chess-transformers --no-deps  -->
 python -m pip install -e ./chess-transformers --no-deps
 
-# Verify
+## Verify
 python -c "import chess_transformers; print(chess_transformers.__file__)"
 
 --------------------------------------------------------------------------------
@@ -115,13 +116,13 @@ make
 mkdir -p /workspace/6s890-finalproject/bin
 cp pgn-extract /workspace/6s890-finalproject/bin/
 
-# Add to PATH (for this session)
+## Add to PATH (for this session)
 export PATH=/workspace/6s890-finalproject/bin:$PATH
 
-# Add to future shells
+## Add to future shells
 echo 'export PATH=/workspace/6s890-finalproject/bin:$PATH' >> ~/.bashrc
 
-# Inside venv 
+## Inside venv 
 export PATH=/workspace/6s890-finalproject/bin:$PATH
 
 which pgn-extract
@@ -135,9 +136,9 @@ cd /workspace/6s890-finalproject
 mkdir -p data/data_files data/chunks
 
 
-# Example download (replace with your PGN URL):
-# wget -O data/data_files/lichess_2025-05.pgn.zst https://database.lichess.org/standard/lichess_db_standard_rated_2025-05.pgn.zst
-# unzstd data/data_files/*.zst
+## Example download (replace with your PGN URL):
+## wget -O data/data_files/lichess_2025-05.pgn.zst https://database.lichess.org/standard/lichess_db_standard_rated_2025-05.pgn.zst
+## unzstd data/data_files/*.zst
 
 wget -O file_name link
 
