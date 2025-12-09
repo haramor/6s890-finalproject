@@ -1,0 +1,20 @@
+{
+  "efficiency_comparison": {
+    "baseline": {
+      "samples_to_target": null,
+      "max_value": 0.34375,
+      "final_value": 0.140625,
+      "max_samples": 14039040,
+      "reached_target": false
+    },
+    "expert": {
+      "samples_to_target": null,
+      "max_value": 0.390625,
+      "final_value": 0.140625,
+      "max_samples": 24581120,
+      "reached_target": false
+    }
+  },
+  "target_metric": "train/top3_acc",
+  "target_value": 30.0
+}

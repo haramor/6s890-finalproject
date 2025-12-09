@@ -1,0 +1,27 @@
+{
+  "n_evaluated": 1000,
+  "sf_agreement_depth5": 13.600000000000001,
+  "model_in_sf_top3_depth5": 30.8,
+  "model_in_sf_top5_depth5": 41.6,
+  "sf_in_model_top3_depth5": 31.2,
+  "sf_in_model_top5_depth5": 41.6,
+  "sf_agreement_depth10": 16.1,
+  "model_in_sf_top3_depth10": 30.7,
+  "model_in_sf_top5_depth10": 41.6,
+  "sf_in_model_top3_depth10": 32.0,
+  "sf_in_model_top5_depth10": 41.5,
+  "sf_agreement_depth15": 15.5,
+  "model_in_sf_top3_depth15": 31.5,
+  "model_in_sf_top5_depth15": 41.199999999999996,
+  "sf_in_model_top3_depth15": 31.900000000000002,
+  "sf_in_model_top5_depth15": 41.6,
+  "legal_move_rate": 100.0,
+  "top1_accuracy": 16.8,
+  "top3_accuracy": 35.0,
+  "top5_accuracy": 43.9,
+  "metadata": {
+    "epoch": 1,
+    "step": "unknown"
+  },
+  "experiment": "expert"
+}

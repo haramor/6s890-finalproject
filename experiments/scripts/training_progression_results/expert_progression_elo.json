@@ -1,0 +1,22 @@
+[
+  {
+    "n_samples": 500,
+    "legal_move_rate": 100.0,
+    "top1_accuracy": 46.800000000000004,
+    "top3_accuracy": 73.0,
+    "sf_depth": 10,
+    "sf_agreement_by_elo_pct": {
+      "1500": 28.799999999999997,
+      "2000": 30.4,
+      "2500": 33.4
+    },
+    "sf_agreement_by_elo_count": {
+      "1500": 144,
+      "2000": 152,
+      "2500": 167
+    },
+    "step_key": 1764834098,
+    "step_key_source": "mtime",
+    "checkpoint": "best_expert_LE22ct.pt"
+  }
+]

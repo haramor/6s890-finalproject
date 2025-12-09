@@ -1,0 +1,42 @@
+{
+  "baseline": {
+    "n_evaluated": 500,
+    "stockfish_agreement_exact": 12.4,
+    "model_in_sf_top3": 28.999999999999996,
+    "model_in_sf_top5": 38.2,
+    "sf_in_model_top3": 26.8,
+    "sf_in_model_top5": 36.8,
+    "top1_accuracy": 14.6,
+    "mean_kl_divergence": 9.255660233872794,
+    "std_kl_divergence": 12.740859193956949,
+    "median_kl_divergence": 5.809311431592928,
+    "mean_centipawn_loss": 841.692,
+    "std_centipawn_loss": 2206.97961140016,
+    "median_centipawn_loss": 143.5,
+    "metadata": {
+      "epoch": 7,
+      "step": "unknown"
+    },
+    "experiment": "baseline"
+  },
+  "expert": {
+    "n_evaluated": 500,
+    "stockfish_agreement_exact": 15.2,
+    "model_in_sf_top3": 29.799999999999997,
+    "model_in_sf_top5": 40.8,
+    "sf_in_model_top3": 30.0,
+    "sf_in_model_top5": 39.0,
+    "top1_accuracy": 15.8,
+    "mean_kl_divergence": 8.931177200590511,
+    "std_kl_divergence": 14.731032957670068,
+    "median_kl_divergence": 5.095586316754838,
+    "mean_centipawn_loss": 683.398,
+    "std_centipawn_loss": 2070.4712496424577,
+    "median_centipawn_loss": 118.5,
+    "metadata": {
+      "epoch": 1,
+      "step": "unknown"
+    },
+    "experiment": "expert"
+  }
+}

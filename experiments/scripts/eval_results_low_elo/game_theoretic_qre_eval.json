@@ -1,0 +1,32 @@
+{
+  "n_evaluated": 1000,
+  "stockfish_depths_used": [
+    5,
+    8,
+    10
+  ],
+  "sf_agreement_depth5": 0.1,
+  "model_in_sf_top3_depth5": 0.1,
+  "model_in_sf_top5_depth5": 0.1,
+  "sf_in_model_top3_depth5": 0.1,
+  "sf_in_model_top5_depth5": 0.1,
+  "sf_agreement_depth8": 0.1,
+  "model_in_sf_top3_depth8": 0.1,
+  "model_in_sf_top5_depth8": 0.1,
+  "sf_in_model_top3_depth8": 0.1,
+  "sf_in_model_top5_depth8": 0.1,
+  "sf_agreement_depth10": 0.0,
+  "model_in_sf_top3_depth10": 0.1,
+  "model_in_sf_top5_depth10": 0.1,
+  "sf_in_model_top3_depth10": 0.0,
+  "sf_in_model_top5_depth10": 0.0,
+  "legal_move_rate": 0.3,
+  "top1_accuracy": 0.1,
+  "top3_accuracy": 0.1,
+  "top5_accuracy": 0.1,
+  "metadata": {
+    "epoch": 0,
+    "step": "unknown"
+  },
+  "experiment": "game_theoretic_qre"
+}

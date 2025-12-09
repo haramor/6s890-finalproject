@@ -1,0 +1,32 @@
+{
+  "n_evaluated": 1000,
+  "stockfish_depths_used": [
+    5,
+    8,
+    10
+  ],
+  "sf_agreement_depth5": 33.1,
+  "model_in_sf_top3_depth5": 58.599999999999994,
+  "model_in_sf_top5_depth5": 69.39999999999999,
+  "sf_in_model_top3_depth5": 57.699999999999996,
+  "sf_in_model_top5_depth5": 70.1,
+  "sf_agreement_depth8": 32.800000000000004,
+  "model_in_sf_top3_depth8": 60.8,
+  "model_in_sf_top5_depth8": 72.1,
+  "sf_in_model_top3_depth8": 57.8,
+  "sf_in_model_top5_depth8": 69.89999999999999,
+  "sf_agreement_depth10": 33.300000000000004,
+  "model_in_sf_top3_depth10": 61.8,
+  "model_in_sf_top5_depth10": 72.5,
+  "sf_in_model_top3_depth10": 59.4,
+  "sf_in_model_top5_depth10": 70.6,
+  "legal_move_rate": 100.0,
+  "top1_accuracy": 39.1,
+  "top3_accuracy": 66.4,
+  "top5_accuracy": 76.8,
+  "metadata": {
+    "epoch": 16,
+    "step": "unknown"
+  },
+  "experiment": "baseline"
+}

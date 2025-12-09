@@ -1,0 +1,9 @@
+{
+  "top_1": 10.614261659772856,
+  "top_3": 20.364940504502552,
+  "top_5": 26.084897235049866,
+  "total_samples": 996546,
+  "config_name": "expert_LE22ct",
+  "experiment_type": "expert_only",
+  "checkpoint": "experiments/results/expert_LE22ct/checkpoints/best_expert_LE22ct.pt"
+}

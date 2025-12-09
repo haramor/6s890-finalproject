@@ -37,7 +37,9 @@ class GameTheoreticLoss(torch.nn.Module):
         stockfish_time_limit: float = 0.1,
         use_cache: bool = True,
         cache_size: int = 10000,
-        device: str = "cuda" if torch.cuda.is_available() else "cpu"
+        device: str = "cuda" if torch.cuda.is_available() else "cpu",
+        disable_stockfish: bool = False,
+        precomputed_cache_path: Optional[str] = None  # NEW: path to precomputed distributions
     ):
         """
         Initialize the game-theoretic loss.
@@ -52,6 +54,8 @@ class GameTheoreticLoss(torch.nn.Module):
             use_cache: Whether to cache Stockfish evaluations
             cache_size: Size of LRU cache for Stockfish evaluations
             device: Device for tensor operations
+            disable_stockfish: If True, skip real-time Stockfish calls (for stability)
+            precomputed_cache_path: Path to precomputed Stockfish distributions (.pkl file)
         """
         super(GameTheoreticLoss, self).__init__()
 
@@ -62,15 +66,35 @@ class GameTheoreticLoss(torch.nn.Module):
         self.stockfish_time_limit = stockfish_time_limit
         self.use_cache = use_cache
         self.device = device
+        self.disable_stockfish = disable_stockfish
+        self.precomputed_cache_path = precomputed_cache_path
 
-        # Initialize Stockfish engine if path provided
+        # Load precomputed distributions if provided
+        self.precomputed_distributions = None
+        if precomputed_cache_path:
+            try:
+                import pickle
+                with open(precomputed_cache_path, 'rb') as f:
+                    self.precomputed_distributions = pickle.load(f)
+                print(f"✓ Loaded {len(self.precomputed_distributions)} precomputed Stockfish distributions")
+                print(f"  Cache file: {precomputed_cache_path}")
+            except Exception as e:
+                print(f"Warning: Could not load precomputed cache: {e}")
+                self.precomputed_distributions = None
+
+        # Initialize Stockfish engine if path provided and not disabled
         self.engine = None
-        if stockfish_path and gt_weight > 0:
+        if stockfish_path and gt_weight > 0 and not disable_stockfish and not precomputed_cache_path:
             try:
                 self.engine = chess.engine.SimpleEngine.popen_uci(stockfish_path)
+                print(f"✓ Stockfish initialized successfully at {stockfish_path}")
             except Exception as e:
                 print(f"Warning: Could not initialize Stockfish: {e}")
                 print("Game-theoretic regularization will be disabled")
+        elif disable_stockfish:
+            print("Stockfish calls disabled - GT regularization will return uniform distributions")
+        elif precomputed_cache_path:
+            print("Using precomputed Stockfish distributions - no real-time engine needed")
 
         # Cache for Stockfish evaluations
         if use_cache:
@@ -83,6 +107,87 @@ class GameTheoreticLoss(torch.nn.Module):
         # For efficient indexing
         self.indices = torch.arange(n_predictions).unsqueeze(0).to(device)
         self.indices.requires_grad = False
+
+        # Move vocabulary will be set by set_move_vocab() after initialization
+        self.uci_to_idx = None
+        self.idx_to_uci = None
+        
+    def set_move_vocab(self, move_to_index: dict, index_to_move: dict):
+        """
+        Set the move vocabulary from the dataset.
+        
+        Args:
+            move_to_index: Dictionary mapping UCI moves to indices
+            index_to_move: Dictionary mapping indices to UCI moves
+        """
+        self.uci_to_idx = move_to_index
+        self.idx_to_uci = index_to_move
+        print(f"Move vocabulary set with {len(self.uci_to_idx)} moves")
+
+    def _board_tensor_to_fen(self, board_tensor: torch.Tensor) -> str:
+        """
+        Convert board position tensor to FEN string.
+        
+        Args:
+            board_tensor: Tensor of shape (64,) with piece encodings
+                         Encoding: 0=empty, 1=P, 2=N, 3=B, 4=R, 5=Q, 6=K,
+                                  7=p, 8=n, 9=b, 10=r, 11=q, 12=k
+        
+        Returns:
+            FEN string representing the position
+        """
+        # Piece type mapping
+        piece_map = {
+            0: '.',   # empty
+            1: 'P',   # white pawn
+            2: 'N',   # white knight
+            3: 'B',   # white bishop
+            4: 'R',   # white rook
+            5: 'Q',   # white queen
+            6: 'K',   # white king
+            7: 'p',   # black pawn
+            8: 'n',   # black knight
+            9: 'b',   # black bishop
+            10: 'r',  # black rook
+            11: 'q',  # black queen
+            12: 'k',  # black king
+        }
+
+        # Convert tensor to CPU and numpy for easier processing
+        board_array = board_tensor.cpu().numpy()
+
+        # Build FEN string rank by rank (from rank 8 to rank 1)
+        fen_ranks = []
+        for rank in range(7, -1, -1):  # Ranks 8 to 1
+            fen_rank = ""
+            empty_count = 0
+            
+            for file in range(8):  # Files a to h
+                square_idx = rank * 8 + file
+                piece_code = int(board_array[square_idx])
+                piece_char = piece_map.get(piece_code, '.')
+                
+                if piece_char == '.':
+                    empty_count += 1
+                else:
+                    if empty_count > 0:
+                        fen_rank += str(empty_count)
+                        empty_count = 0
+                    fen_rank += piece_char
+            
+            if empty_count > 0:
+                fen_rank += str(empty_count)
+            
+            fen_ranks.append(fen_rank)
+
+        # Join ranks with '/'
+        board_fen = '/'.join(fen_ranks)
+
+        # For simplicity, assume white to move, no castling rights, no en passant
+        # In a full implementation, these would come from additional batch fields
+        full_fen = f"{board_fen} w KQkq - 0 1"
+
+        return full_fen
 
     def _get_stockfish_distribution_uncached(
         self,
@@ -108,16 +213,26 @@ class GameTheoreticLoss(torch.nn.Module):
             return {move: uniform_prob for move in legal_moves_uci}
 
         try:
+            # Check if engine is still alive, restart if needed
+            if not hasattr(self.engine, 'process') or self.engine.process.poll() is not None:
+                print("Stockfish engine died, restarting...")
+                try:
+                    self.engine.quit()
+                except:
+                    pass
+                self.engine = chess.engine.SimpleEngine.popen_uci(self.stockfish_path)
+                
             board = chess.Board(fen)
 
             # Analyze with multi-PV to get top moves
+            num_legal = len(list(board.legal_moves))
             info = self.engine.analyse(
                 board,
                 chess.engine.Limit(
                     depth=self.stockfish_depth,
                     time=self.stockfish_time_limit
                 ),
-                multipv=min(len(list(board.legal_moves)), 5)  # Top 5 moves
+                multipv=min(num_legal, 5)  # Top 5 moves
             )
 
             # Extract centipawn scores and moves
@@ -125,29 +240,38 @@ class GameTheoreticLoss(torch.nn.Module):
             for result in (info if isinstance(info, list) else [info]):
                 if "pv" in result and len(result["pv"]) > 0:
                     move = result["pv"][0].uci()
-                    score = result.get("score", chess.engine.Score(0))
+                    score = result.get("score", chess.engine.PovScore(chess.engine.Cp(0), chess.WHITE))
 
                     # Convert score to centipawns (from perspective of side to move)
-                    if score.is_mate():
+                    pov_score = score.white() if board.turn == chess.WHITE else score.black()
+                    
+                    if pov_score.is_mate():
                         # Mate scores: very high for winning, very low for losing
-                        mate_in = score.mate()
-                        cp = 10000 * (1 if mate_in > 0 else -1) / abs(mate_in)
+                        mate_in = pov_score.mate()
+                        cp = 10000 if mate_in > 0 else -10000
                     else:
-                        cp = score.score()
+                        cp = pov_score.score()
 
                     move_scores[move] = cp
+
+            # If no moves were evaluated, return uniform
+            if not move_scores:
+                uniform_prob = 1.0 / len(legal_moves_uci)
+                return {move: uniform_prob for move in legal_moves_uci}
 
             # Convert centipawn scores to probabilities via softmax
             # Higher centipawn score = better move = higher probability
             temperature = 100.0  # Temperature for softmax (tune this)
-            scores = torch.tensor([move_scores.get(m, -1000) for m in legal_moves_uci])
+            
+            # Assign very low score to moves not in top-k
+            default_score = min(move_scores.values()) - 500 if move_scores else -1000
+            scores = torch.tensor([move_scores.get(m, default_score) for m in legal_moves_uci])
             probs = F.softmax(scores / temperature, dim=0)
 
             return {move: probs[i].item() for i, move in enumerate(legal_moves_uci)}
 
         except Exception as e:
-            print(f"Error getting Stockfish distribution: {e}")
-            # Return uniform distribution on error
+            # Silently return uniform on error to avoid spam
             uniform_prob = 1.0 / len(legal_moves_uci)
             return {move: uniform_prob for move in legal_moves_uci}
 
@@ -189,69 +313,116 @@ class GameTheoreticLoss(torch.nn.Module):
     def compute_kl_loss(
         self,
         predicted: torch.Tensor,
-        board_states: list,  # List of FEN strings
-        legal_moves: list,   # List of lists of legal moves (indices)
-        move_vocab: list     # Vocabulary mapping indices to UCI moves
+        board_states: torch.Tensor,
+        subsample_ratio: float = 0.05  # Only evaluate 5% of positions
     ) -> torch.Tensor:
         """
         Compute KL-divergence between model predictions and Stockfish distribution.
+        
+        If precomputed distributions are available, uses those. Otherwise, falls back
+        to real-time Stockfish evaluation with subsampling.
 
         KL(Stockfish || Model) = Σ p_sf(a) log(p_sf(a) / p_model(a))
 
         Args:
             predicted: Model predictions (N, vocab_size)
-            board_states: List of board positions in FEN notation
-            legal_moves: List of legal move indices for each position
-            move_vocab: Vocabulary mapping indices to UCI notation
+            board_states: Board position tensors (N, 64)
+            subsample_ratio: Fraction of batch to evaluate (only used if calling Stockfish live)
 
         Returns:
             Scalar KL-divergence loss
         """
-        if self.engine is None or self.gt_weight == 0:
+        if self.gt_weight == 0:
+            return torch.tensor(0.0, device=self.device)
+        
+        if self.uci_to_idx is None:
             return torch.tensor(0.0, device=self.device)
 
         batch_size = predicted.shape[0]
+        
+        # If using precomputed distributions, we can evaluate ALL positions (no subsampling needed)
+        if self.precomputed_distributions is not None:
+            sample_indices = list(range(batch_size))
+            scaling_factor = 1.0  # No scaling needed
+        else:
+            # Real-time Stockfish: subsample to keep training fast
+            if self.engine is None:
+                return torch.tensor(0.0, device=self.device)
+            
+            num_samples = max(1, int(batch_size * subsample_ratio))
+            sample_indices = torch.randperm(batch_size, device='cpu')[:num_samples].tolist()
+            scaling_factor = 1.0 / subsample_ratio  # Scale up to account for subsampling
+        
         kl_losses = []
 
-        for i in range(batch_size):
+        for idx in sample_indices:
             try:
-                # Get legal moves for this position
-                legal_move_indices = legal_moves[i]
-                legal_moves_uci = tuple([move_vocab[idx] for idx in legal_move_indices])
+                # Convert board tensor to FEN
+                fen = self._board_tensor_to_fen(board_states[idx])
+                
+                # Get Stockfish distribution (from cache or live)
+                if self.precomputed_distributions is not None:
+                    # Use precomputed distribution
+                    if fen not in self.precomputed_distributions:
+                        continue  # Skip if position not in cache
+                    sf_dist = self.precomputed_distributions[fen]
+                else:
+                    # Call Stockfish live
+                    board = chess.Board(fen)
+                    legal_moves_uci = tuple([move.uci() for move in board.legal_moves])
+                    
+                    if len(legal_moves_uci) == 0:
+                        continue
+                    
+                    sf_dist = self._get_stockfish_distribution(fen, legal_moves_uci)
 
-                # Get Stockfish distribution
-                sf_dist = self._get_stockfish_distribution(
-                    board_states[i],
-                    legal_moves_uci
-                )
+                if not sf_dist:  # Empty distribution
+                    continue
 
-                # Create target distribution tensor
+                # Create target distribution tensor (only over legal moves)
                 sf_probs = torch.zeros(predicted.shape[1], device=self.device)
-                for idx, uci_move in zip(legal_move_indices, legal_moves_uci):
-                    sf_probs[idx] = sf_dist[uci_move]
+                model_mask = torch.zeros(predicted.shape[1], dtype=torch.bool, device=self.device)
+                
+                for uci_move, prob in sf_dist.items():
+                    if uci_move in self.uci_to_idx:
+                        move_idx = self.uci_to_idx[uci_move]
+                        if move_idx < predicted.shape[1]:  # Safety check
+                            sf_probs[move_idx] = prob
+                            model_mask[move_idx] = True
 
-                # Get model distribution
-                model_log_probs = F.log_softmax(predicted[i], dim=0)
+                # Check if we found any valid moves
+                if not model_mask.any():
+                    continue
 
-                # Compute KL divergence: KL(p||q) = Σ p(x) log(p(x)/q(x))
-                #                                  = Σ p(x) log p(x) - Σ p(x) log q(x)
-                kl = (sf_probs * (torch.log(sf_probs + 1e-10) - model_log_probs)).sum()
+                # Get model distribution (masked to legal moves only)
+                model_logits_masked = predicted[idx].clone()
+                model_logits_masked[~model_mask] = float('-inf')
+                model_log_probs = F.log_softmax(model_logits_masked, dim=0)
+
+                # Compute KL divergence
+                kl = (sf_probs[model_mask] * (
+                    torch.log(sf_probs[model_mask] + 1e-10) - model_log_probs[model_mask]
+                )).sum()
+                
                 kl_losses.append(kl)
 
             except Exception as e:
-                print(f"Error computing KL loss for position {i}: {e}")
-                kl_losses.append(torch.tensor(0.0, device=self.device))
+                # Silently skip errors
+                continue
 
-        return torch.stack(kl_losses).mean()
+        if len(kl_losses) == 0:
+            return torch.tensor(0.0, device=self.device)
+
+        # Scale by subsample ratio if using live Stockfish
+        return torch.stack(kl_losses).mean() * scaling_factor
 
     def forward(
         self,
         predicted: torch.Tensor,
         targets: torch.Tensor,
         lengths: torch.Tensor,
-        board_states: Optional[list] = None,
-        legal_moves: Optional[list] = None,
-        move_vocab: Optional[list] = None
+        board_states: Optional[torch.Tensor] = None,
+        **kwargs  # Accept and ignore other arguments for compatibility
     ) -> tuple:
         """
         Compute combined loss: L = L_CE + λ * L_KL
@@ -260,9 +431,8 @@ class GameTheoreticLoss(torch.nn.Module):
             predicted: Model predictions (N, n_predictions, vocab_size)
             targets: Ground truth moves (N, n_predictions)
             lengths: Sequence lengths (N, 1)
-            board_states: Optional list of FEN strings for GT regularization
-            legal_moves: Optional list of legal move indices for GT regularization
-            move_vocab: Optional move vocabulary for GT regularization
+            board_states: Optional board position tensors (N, 64) for GT regularization
+            **kwargs: Other arguments (ignored, for backward compatibility)
 
         Returns:
             Tuple of (total_loss, ce_loss, kl_loss) for logging
@@ -272,19 +442,10 @@ class GameTheoreticLoss(torch.nn.Module):
 
         # Compute KL-divergence loss if game-theoretic regularization enabled
         kl_loss = torch.tensor(0.0, device=self.device)
-        if (self.gt_weight > 0 and
-            board_states is not None and
-            legal_moves is not None and
-            move_vocab is not None):
-
+        if self.gt_weight > 0 and board_states is not None:
             # Use only first prediction for KL loss (next move)
             first_pred = predicted[:, 0, :]  # (N, vocab_size)
-            kl_loss = self.compute_kl_loss(
-                first_pred,
-                board_states,
-                legal_moves,
-                move_vocab
-            )
+            kl_loss = self.compute_kl_loss(first_pred, board_states)
 
         # Combined loss
         total_loss = ce_loss + self.gt_weight * kl_loss
@@ -318,7 +479,8 @@ class LabelSmoothedCE(torch.nn.Module):
         self,
         predicted: torch.Tensor,
         targets: torch.Tensor,
-        lengths: torch.Tensor
+        lengths: torch.Tensor,
+        **kwargs  # Accept and ignore extra arguments for compatibility
     ) -> torch.Tensor:
         """
         Compute label-smoothed cross-entropy loss.

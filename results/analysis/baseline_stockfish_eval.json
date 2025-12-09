@@ -1,0 +1,15 @@
+{
+  "n_samples": 1000,
+  "n_eval": 1000,
+  "top1_accuracy": 13.900000000000002,
+  "legal_move_rate": 100.0,
+  "stockfish_agreement_d5": 11.700000000000001,
+  "stockfish_agreement_d10": 11.600000000000001,
+  "stockfish_agreement_d15": 13.8,
+  "stockfish_top3_d10": 28.7,
+  "stockfish_top5_d10": 39.6,
+  "model_top3_contains_stockfish": 28.499999999999996,
+  "model_top5_contains_stockfish": 37.9,
+  "skipped_no_legal_in_vocab": 0,
+  "skipped_bad_board": 0
+}

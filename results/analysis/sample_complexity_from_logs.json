@@ -1,0 +1,21 @@
+{
+  "experiments": {
+    "baseline": {
+      "n_train_samples": 1950159,
+      "batch_size": 64,
+      "batches_per_step": 4,
+      "n_steps": 8966,
+      "max_training_samples": 14039040
+    },
+    "expert": {
+      "n_train_samples": 13287522,
+      "batch_size": 64,
+      "batches_per_step": 4,
+      "n_steps": 9602,
+      "max_training_samples": 24581120
+    }
+  },
+  "efficiency_comparison": {},
+  "target_metric": "val/top5_accuracy",
+  "target_value": 30.0
+}

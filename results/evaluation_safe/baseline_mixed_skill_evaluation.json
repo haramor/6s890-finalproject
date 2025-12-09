@@ -1,0 +1,9 @@
+{
+  "top_1": 10.230442630348278,
+  "top_3": 20.15270541904254,
+  "top_5": 26.095807523485252,
+  "total_samples": 195016,
+  "config_name": "baseline_mixed_skill",
+  "experiment_type": "baseline",
+  "checkpoint": "experiments/results/baseline_mixed_skill/checkpoints/best_baseline_mixed_skill.pt"
+}

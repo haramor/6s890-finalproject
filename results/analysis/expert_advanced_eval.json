@@ -1,0 +1,20 @@
+{
+  "n_evaluated": 500,
+  "stockfish_agreement_exact": 15.2,
+  "model_in_sf_top3": 29.799999999999997,
+  "model_in_sf_top5": 40.8,
+  "sf_in_model_top3": 30.0,
+  "sf_in_model_top5": 39.0,
+  "top1_accuracy": 15.8,
+  "mean_kl_divergence": 8.931177200590511,
+  "std_kl_divergence": 14.731032957670068,
+  "median_kl_divergence": 5.095586316754838,
+  "mean_centipawn_loss": 683.398,
+  "std_centipawn_loss": 2070.4712496424577,
+  "median_centipawn_loss": 118.5,
+  "metadata": {
+    "epoch": 1,
+    "step": "unknown"
+  },
+  "experiment": "expert"
+}

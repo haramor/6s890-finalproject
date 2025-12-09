@@ -1,0 +1,30 @@
+{
+  "experiments": {
+    "baseline": {
+      "batch_size": 64,
+      "batches_per_step": 4
+    },
+    "expert": {
+      "batch_size": 64,
+      "batches_per_step": 4
+    }
+  },
+  "efficiency_results": {
+    "baseline": {
+      "samples_to_target": 2675200,
+      "max_value": 34.375,
+      "final_value": 14.0625,
+      "max_samples": 14039040,
+      "reached_target": true
+    },
+    "expert": {
+      "samples_to_target": 7249920,
+      "max_value": 39.0625,
+      "final_value": 14.0625,
+      "max_samples": 24581120,
+      "reached_target": true
+    }
+  },
+  "target_metric": "train/top3_acc",
+  "target_value_pct": 30.0
+}

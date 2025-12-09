@@ -1,0 +1,68 @@
+{
+  "baseline": [
+    {
+      "n_samples": 500,
+      "legal_move_rate": 100.0,
+      "top1_accuracy": 40.2,
+      "top3_accuracy": 67.80000000000001,
+      "sf_depth": 10,
+      "sf_agreement_by_elo_pct": {
+        "1500": 23.400000000000002,
+        "2000": 25.2,
+        "2500": 26.400000000000002
+      },
+      "sf_agreement_by_elo_count": {
+        "1500": 117,
+        "2000": 126,
+        "2500": 132
+      },
+      "step_key": 1764750772,
+      "step_key_source": "mtime",
+      "checkpoint": "best_baseline_mixed_skill.pt"
+    }
+  ],
+  "expert": [
+    {
+      "n_samples": 500,
+      "legal_move_rate": 100.0,
+      "top1_accuracy": 46.800000000000004,
+      "top3_accuracy": 73.0,
+      "sf_depth": 10,
+      "sf_agreement_by_elo_pct": {
+        "1500": 28.799999999999997,
+        "2000": 30.4,
+        "2500": 33.4
+      },
+      "sf_agreement_by_elo_count": {
+        "1500": 144,
+        "2000": 152,
+        "2500": 167
+      },
+      "step_key": 1764834098,
+      "step_key_source": "mtime",
+      "checkpoint": "best_expert_LE22ct.pt"
+    }
+  ],
+  "random": [
+    {
+      "n_samples": 500,
+      "legal_move_rate": 100.0,
+      "top1_accuracy": 14.799999999999999,
+      "top3_accuracy": 30.4,
+      "sf_depth": 10,
+      "sf_agreement_by_elo_pct": {
+        "1500": 10.8,
+        "2000": 6.6000000000000005,
+        "2500": 9.6
+      },
+      "sf_agreement_by_elo_count": {
+        "1500": 54,
+        "2000": 33,
+        "2500": 48
+      },
+      "step_key": 1764822917,
+      "step_key_source": "mtime",
+      "checkpoint": "best_random_skill.pt"
+    }
+  ]
+}

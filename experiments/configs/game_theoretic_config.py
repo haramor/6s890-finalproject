@@ -24,16 +24,16 @@ LOGS_FOLDER = str(BASE_DIR / "results" / NAME / "logs")
 EVAL_GAMES_FOLDER = str(BASE_DIR / "results" / NAME / "eval_games")
 
 # Stockfish path - set via environment variable or default
-STOCKFISH_PATH = os.environ.get("CT_STOCKFISH_PATH", "/usr/local/bin/stockfish")
+STOCKFISH_PATH = os.environ.get("CT_STOCKFISH_PATH", "/usr/games/stockfish")
 
 ###############################
 ######### Dataloading #########
 ###############################
 
-BATCH_SIZE = 64  # Same as other conditions
-NUM_WORKERS = 0  # Set to 0 to avoid multiprocessing pickle issues with HDF5
+BATCH_SIZE = 512  # Same as other conditions
+NUM_WORKERS = 8  # Set to 0 to avoid multiprocessing pickle issues with HDF5
 PREFETCH_FACTOR = 2
-PIN_MEMORY = False  # Set to False for CPU training
+PIN_MEMORY = True  # Set to False for CPU training
 
 # Dataset configuration
 H5_FILE = "expert_2500_10k.h5"
@@ -66,10 +66,10 @@ DROPOUT = 0.1
 ########### Training ##########
 ###############################
 
-BATCHES_PER_STEP = 4
+BATCHES_PER_STEP = 1
 PRINT_FREQUENCY = 10
-N_STEPS = 1000
-WARMUP_STEPS = 100
+N_STEPS = 100000
+WARMUP_STEPS = 8000
 LR_SCHEDULE = "vaswani"
 LR_DECAY = None
 
@@ -101,7 +101,7 @@ USE_GT_REGULARIZATION = True
 
 # Weight for KL-divergence term (λ in loss = CE + λ * KL)
 # Start with 0.1, tune based on validation performance
-GT_WEIGHT = 0.1
+GT_WEIGHT = 0.5
 
 # Stockfish configuration for equilibrium oracle
 STOCKFISH_DEPTH = 15  # Depth for position evaluation

@@ -1,0 +1,94 @@
+{
+  "expert_entropy_2k": [
+    {
+      "n_samples": 500,
+      "legal_move_rate": 0.0,
+      "top1_accuracy": 0.0,
+      "top3_accuracy": 0.0,
+      "sf_depth": 10,
+      "sf_agreement_by_elo_pct": {
+        "1320": 0.0,
+        "1500": 0.0,
+        "2000": 0.0,
+        "2500": 0.0
+      },
+      "sf_agreement_by_elo_count": {
+        "1320": 0,
+        "1500": 0,
+        "2000": 0,
+        "2500": 0
+      },
+      "step_key": 2000,
+      "step_key_source": "filename",
+      "checkpoint": "checkpoint_step_2000.pt"
+    },
+    {
+      "n_samples": 500,
+      "legal_move_rate": 0.0,
+      "top1_accuracy": 0.0,
+      "top3_accuracy": 0.0,
+      "sf_depth": 10,
+      "sf_agreement_by_elo_pct": {
+        "1320": 0.0,
+        "1500": 0.0,
+        "2000": 0.0,
+        "2500": 0.0
+      },
+      "sf_agreement_by_elo_count": {
+        "1320": 0,
+        "1500": 0,
+        "2000": 0,
+        "2500": 0
+      },
+      "step_key": 1764804425,
+      "step_key_source": "mtime",
+      "checkpoint": "best_expert_entropy_2k.pt"
+    }
+  ],
+  "expert_standard_2k": [
+    {
+      "n_samples": 500,
+      "legal_move_rate": 0.0,
+      "top1_accuracy": 0.0,
+      "top3_accuracy": 0.0,
+      "sf_depth": 10,
+      "sf_agreement_by_elo_pct": {
+        "1320": 0.0,
+        "1500": 0.0,
+        "2000": 0.0,
+        "2500": 0.0
+      },
+      "sf_agreement_by_elo_count": {
+        "1320": 0,
+        "1500": 0,
+        "2000": 0,
+        "2500": 0
+      },
+      "step_key": 2000,
+      "step_key_source": "filename",
+      "checkpoint": "checkpoint_step_2000.pt"
+    },
+    {
+      "n_samples": 500,
+      "legal_move_rate": 0.0,
+      "top1_accuracy": 0.0,
+      "top3_accuracy": 0.0,
+      "sf_depth": 10,
+      "sf_agreement_by_elo_pct": {
+        "1320": 0.0,
+        "1500": 0.0,
+        "2000": 0.0,
+        "2500": 0.0
+      },
+      "sf_agreement_by_elo_count": {
+        "1320": 0,
+        "1500": 0,
+        "2000": 0,
+        "2500": 0
+      },
+      "step_key": 1764803809,
+      "step_key_source": "mtime",
+      "checkpoint": "best_expert_standard_2k.pt"
+    }
+  ]
+}
